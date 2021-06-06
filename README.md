@@ -28,7 +28,7 @@ https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-
 
 When determining the scope of the access token you will want to check the following boxes.
 
-![](/filename pat_scope.png)
+![](/pat_scope.png)
 
 
 Once you have your access token run an export command from your working directory in your virtual environment 
