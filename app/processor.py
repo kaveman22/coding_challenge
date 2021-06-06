@@ -52,10 +52,13 @@ class Data(Logger):
         Return Tuple (languages set, number of languages)
         """
         languages = []
-        
-        for i in bitbucket_payload:
-            languages += i['language']
+        try:
+            for i in bitbucket_payload:
+                languages.append(i['language'])
 
-        languages = list(set(languages))
+            languages = list(set(languages))
+        except Exception as e:
+            
+            logging.info('There was an error getting bitbucket languages {}'.format(e))
 
         return languages, len(languages)

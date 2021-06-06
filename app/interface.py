@@ -1,14 +1,16 @@
+from typing import Tuple
 from .processor import Data
 from .utils import Logger
 import json 
 import logging 
 import requests
+from os import environ
 
 class API(Logger):
     def __init__(self, org):
         self.org = org
         self.data = Data()
-
+        self.header = {"Accept": "application/vnd.github.mercy-preview+json", "Authorization": "token {}".format(environ['gh_token'])}
 
     def get_github_num_followers(self) -> object:
         """
@@ -16,7 +18,7 @@ class API(Logger):
         Return integer number of follwers
         """
         url = 'https://api.github.com/orgs/' + self.org
-        res = requests.get(url)
+        res = requests.get(url, headers=self.header)
         res = json.loads(res.text)
         num_github_followers  = self.data.get_github_num_followers(res)
         return num_github_followers
@@ -30,14 +32,14 @@ class API(Logger):
 
         url = 'https://api.github.com/orgs/' + self.org + '/repos'
         try:
-            res = requests.get(url)
+            res = requests.get(url=url, headers=self.header)
         except Exception as e:
             logging.info('There was an error retrieving gitlab repos- {}'.format(e))
             return 0, 0 
         
         res = json.loads(res.text)
         num_original_repos, num_fork_repos = self.data.get_github_num_original_forked_repos(res)
-        
+ 
         return num_original_repos, num_fork_repos
 
     def get_github_languages(self):
@@ -46,7 +48,7 @@ class API(Logger):
         Return: Tuple (list of deduplicate languages, Number of languages)
         """
         url = 'https://api.github.com/orgs/' + self.org + '/repos'
-        res = requests.get(url)
+        res = requests.get(url, headers=self.header)
         res = json.loads(res.text)
 
         lang_urls = [i['languages_url'] for i in res]
@@ -54,10 +56,9 @@ class API(Logger):
         langs = []
         for i in lang_urls:
             try:
-                langs += (json.loads(requests.get(i).text).keys())
+                langs += (json.loads(requests.get(url=i, headers=self.header).text).keys())
             except Exception as e:
                 logging.info("Error Making call to github language endpoint- {}".format(e))
-
         langs = list(set(langs))
 
         return langs, len(langs)
@@ -69,7 +70,7 @@ class API(Logger):
         Return: list of deduplicate languages, Number of languages)
         """
         url = 'https://api.github.com/orgs/' + self.org + '/repos'
-        res = requests.get(url)
+        res = requests.get(url=url, headers=self.header)
         res = json.loads(res.text)
         topics_url = 'https://api.github.com/repos/' + self.org +'/'
         topic_urls = [topics_url + i['name'] + '/topics' for i in res]
@@ -77,16 +78,18 @@ class API(Logger):
         print(f'Topic urels {topic_urls}')
         for i in topic_urls:
             try:
-                res = json.loads(requests.get(i).text)
-                topics += (res['names'])
+                res = json.loads(requests.get(url=i, headers=self.header).text)
+                if 'names' in res:
+                    topics += (res['names'])
             except Exception as e:
                 logging.info("Error Making call to github topic endpoint - {}".format(e))
+                return topics, len(topics)
 
         topics = list(set(topics))
         return topics, len(topics)
 
 
-    def get_bitbucket_repos(self) -> object:
+    def get_bitbucket_repos(self) -> Tuple:
         """
         Get all repositories for an organization on bitbucket and count the number of 
         forked repos vs. original repos 
@@ -94,11 +97,11 @@ class API(Logger):
         """
         repos = []
         url = 'https://api.bitbucket.org/2.0/repositories/' + self.org
-        res = json.loads(requests.get(url).text)
+        res = json.loads(requests.get(url=url, headers=self.header).text)
         repos = res['values']
         if 'next' in res:
             while res['next']:  ## get all repos if pagination exists
-                res = json.loads(requests.get(res['next']).text)
+                res = json.loads(requests.get(url=res['next'], headers=self.header).text)
                 repos += res['values']
 
         original, forked = self.data.get_bitbucket_num_repos(repos, self.org)
@@ -115,7 +118,7 @@ class API(Logger):
         watchers = 0 
         for i in watcher_urls:
             try:
-                res = json.loads(requests.get(i).text)
+                res = json.loads(requests.get(url=i, headers=self.header).text)
                 watchers  += res['size']
             except Exception as e:
                 logging.info('There was an error retrieving watchers -Error: {}'.format(e))
