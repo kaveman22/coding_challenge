@@ -30,7 +30,6 @@ def get_org():
         gh_original, gh_forked = api.get_num_github_repos()
         gh_languages, gh_num_languages = api.get_github_languages()
         gh_topics, gh_num_topics = api.get_github_topics()
-        print(gh_num_topics, gh_topics)
         bb_original, bb_forked, languages, num_languages, watchers = api.get_bitbucket_repos()
 
         response['github_org'] = {

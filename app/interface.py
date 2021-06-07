@@ -75,7 +75,7 @@ class API(Logger):
         topics_url = 'https://api.github.com/repos/' + self.org +'/'
         topic_urls = [topics_url + i['name'] + '/topics' for i in res]
         topics = []
-        print(f'Topic urels {topic_urls}')
+
         for i in topic_urls:
             try:
                 res = json.loads(requests.get(url=i, headers=self.header).text)
