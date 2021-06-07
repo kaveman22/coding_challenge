@@ -10,7 +10,7 @@ python3 -m venv venv
 source source venv/bin/activate
 ```
 once the virtual environment is activavted install dependencies 
-pip install from the requirements file
+from the requirements file
 ``` 
 pip install -r requirements.txt
 ```
@@ -21,7 +21,7 @@ Depending on your version of python
 ```
 
 ## Set the OAuth token for github
-Depending on the organization that you choose to query you make exceed the rate limit for unauthorized github api calls in order to prevent any errors in the response you will need to create a person access token Information on how to do so can be found here.
+Depending on the organization that you choose to query you may exceed the rate limit for unauthorized github api calls. In order to prevent any errors in the response you will need to create a personal access token. Information on how to do so can be found here.
 
 https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token#using-a-token-on-the-command-line
 
@@ -46,6 +46,8 @@ python -m run
 ```
 
 ### Making Requests
+Ensure the server is running and make a request using the following url.
+You can replace 'mailchimp' with some other valid github/bitbucket organization/team_name
 
 ```
 curl -i "http://127.0.0.1:5000/orgs?org_name=mailchimp"
@@ -57,6 +59,7 @@ curl -i "http://127.0.0.1:5000/orgs?org_name=mailchimp"
 Testing -  Due to time constraints I did not have a lot of time to test all functions I would definitely want to write more tests for all functions
 
 Error Handling - There are many situations where an external api can give unexpected responses , so ideally all requests should have adeqaute error handling to account for this.
+
 
 Speed - Because there are many api calls happening to get the data, it takes a while for the final response to come back , I would implement threading to retrieve the data faster 
 
