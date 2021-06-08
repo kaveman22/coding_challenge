@@ -7,7 +7,7 @@ A skeleton flask app to use for a coding challenge.
 create a virtual environment venv
 ```
 python3 -m venv venv
-source source venv/bin/activate
+source venv/bin/activate
 ```
 once the virtual environment is activavted install dependencies 
 from the requirements file
