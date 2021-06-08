@@ -12,7 +12,7 @@ class API(Logger):
         self.data = Data()
         self.header = {"Accept": "application/vnd.github.mercy-preview+json", "Authorization": "token {}".format(environ['gh_token'])}
 
-    def get_github_num_followers(self) -> object:
+    def get_github_num_followers(self) -> int:
         """
         Retrieves Number of followers for a github organization
         Return integer number of follwers
@@ -23,7 +23,7 @@ class API(Logger):
         num_github_followers  = self.data.get_github_num_followers(res)
         return num_github_followers
 
-    def get_num_github_repos(self) -> object:
+    def get_num_github_repos(self) -> Tuple:
         """
         Retrieves all the repos in a github organization, queries all repos and passes
         the data payload to external function to count original vs. forked repos
