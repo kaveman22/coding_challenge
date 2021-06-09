@@ -21,18 +21,19 @@ def health_check():
 @app.route("/orgs", methods=["GET"])
 def get_org():
     """
-    Endpoint to health check API
+    Endpoint to health check API, Takes in organization name
+    as a URL parameter.
     """
     response = {}
     try:
-        org_name = request.args.get('org_name')
-        api = API(org_name)
-        gh_original, gh_forked = api.get_num_github_repos()
+        org_name = request.args.get('org_name')  # Get the Org name 
+        api = API(org_name)  # Create an API object 
+        gh_original, gh_forked = api.get_num_github_repos()  # Line 31-34 can be placed in another file but here for simplicity
         gh_languages, gh_num_languages = api.get_github_languages()
         gh_topics, gh_num_topics = api.get_github_topics()
         bb_original, bb_forked, languages, num_languages, watchers = api.get_bitbucket_repos()
 
-        response['github_org'] = {
+        response['github_org'] = {  # Creates the Response object once all the data is collected and aggregated
             'number_followers': api.get_github_num_followers(),
             'number_original_repos': gh_original,
             'number_forked_repos': gh_forked,

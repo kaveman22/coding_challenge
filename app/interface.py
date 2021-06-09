@@ -1,4 +1,8 @@
-from typing import Tuple
+"""
+API class for making requests to github/bitbucket apis
+"""
+
+from typing import Tuple, List
 from .processor import Data
 from .utils import Logger
 import json 
@@ -42,7 +46,7 @@ class API(Logger):
  
         return num_original_repos, num_fork_repos
 
-    def get_github_languages(self):
+    def get_github_languages(self) -> Tuple:
         """
         Iteratively makes requests to github repos endpoint to collect the language info 
         Return: Tuple (list of deduplicate languages, Number of languages)
@@ -64,10 +68,10 @@ class API(Logger):
         return langs, len(langs)
 
 
-    def get_github_topics(self):
+    def get_github_topics(self) -> Tuple:
         """
         Iteratively makes requests to github topics endpoint to collect the language info 
-        Return: list of deduplicate languages, Number of languages)
+        Return: Tuple of deduplicated languages, Number of languages)
         """
         url = 'https://api.github.com/orgs/' + self.org + '/repos'
         res = requests.get(url=url, headers=self.header)
@@ -96,25 +100,33 @@ class API(Logger):
         Return Tuple (number of original repos, number of forked repos)
         """
         repos = []
-        url = 'https://api.bitbucket.org/2.0/repositories/' + self.org
-        res = json.loads(requests.get(url=url, headers=self.header).text)
-        repos = res['values']
-        if 'next' in res:
-            while res['next']:  ## get all repos if pagination exists
-                res = json.loads(requests.get(url=res['next'], headers=self.header).text)
-                repos += res['values']
-
-        original, forked = self.data.get_bitbucket_num_repos(repos, self.org)
-        languages, num_of_languages = self.data.get_bitbucket_languages(repos)
+        try:
+            url = 'https://api.bitbucket.org/2.0/repositories/' + self.org
+            res = json.loads(requests.get(url=url, headers=self.header).text)
+            repos = res['values']
+            if 'next' in res:
+                while res['next']:  ## get all repos if pagination exists
+                    res = json.loads(requests.get(url=res['next'], headers=self.header).text)
+                    repos += res['values']
+        except Exception as e:
+            logging.info('There was an error getting bitbucket repos - {}'.format(e))
         
-        watcher_urls = [i['links']['watchers']['href'] for i in repos]
+        original, forked = self.data.get_bitbucket_num_repos(repos, self.org)  # Get number of repos
+        languages, num_of_languages = self.data.get_bitbucket_languages(repos) # Get langauges
+        
+        watcher_urls = [i['links']['watchers']['href'] for i in repos]  # Get all the watcher urls 
 
         watchers = self.get_bitbucket_watchers(watcher_urls)
 
         return original, forked, languages, num_of_languages, watchers
 
 
-    def get_bitbucket_watchers(self, watcher_urls):
+    def get_bitbucket_watchers(self, watcher_urls: List) -> int:
+        """
+        Makes request to bitbucket api to get the watchers urls
+        Argument: watcher_urls ( List ) list of url's to get the watchers
+        Return: number of watchers (int)
+        """
         watchers = 0 
         for i in watcher_urls:
             try:
